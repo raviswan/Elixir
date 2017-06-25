@@ -1,0 +1,28 @@
+BLACKJACK
+----------
+
+INTRODUCTION
+This is a command line implementation of single-player blackjack. The dealer deals
+two cards to the player first and then two cards for himself. The dealer "Up" card is assumed to be the first card of the dealer hand.The card suit is not shown in this implementation. Only the face values of the cards are considered and displayed. 
+
+There are three objects in this implementaation: 
+	- card deck (deck.cpp),
+	- dealer (dealer.cpp),
+	- player (player.cpp)
+
+All three objects are created in main.cpp, wherein resides decision-making logic.
+
+REQUIREMENTS COVERED:
+-Single Deck shuffled every 6 rounds.
+-No splits
+-Dealer hits on soft 17
+-Winning Percentage is tracked.
+
+
+TO RUN THE GAME:
+Download the code and on command line:
+> make
+>./black
+
+
+

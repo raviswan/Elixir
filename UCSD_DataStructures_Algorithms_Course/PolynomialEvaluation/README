@@ -1,0 +1,7 @@
+A 'TestPoly' class is used to create, evaluate and print the polynomial. This 
+code is in "testPoly.cpp". This source file in turn invokes "list.cpp" to create
+singly linked list. "main.cpp" is used to instantiate and test TestPoly object.
+
+Please run the program from the command line as follows:
+>g++ -o poly list.cpp testPoly.cpp main.cpp
+>./poly

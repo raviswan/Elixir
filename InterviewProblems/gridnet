@@ -1,0 +1,10 @@
+8 years - smart grid tech -m2m tech .
+data for billing
+srv plfrm - dev mgt 
+embedded side - 
+drive design of comm cards + firmware
+Req
+f/w runs on embedded linux cards
+taking the firmware and putting it on diff h/w stacks
+leverage exp in smart grid
+srv team, embedded team : building appln in C++ + targetting embedded linux

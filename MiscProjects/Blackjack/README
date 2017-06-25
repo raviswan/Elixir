@@ -1,0 +1,24 @@
+BLACKJACK
+----------
+
+INTRODUCTION
+This is  a command line implementation of blackjack that can support multiple players and multiple card decks. It is presently configured to run 1 playing deck for 1 player vs Dealer configuration. If you'd like to change the play set up, modify the constants at the top of "dealer.cpp", which are fairly self-explanatory
+
+The core logic resides in "dealer.cpp". Dealer has a pointer to every player. Once the dealer makes the hand, the player looks up the cards and decides the next course of action. The strategy adopted here is for SingleDeck-Single Player blackjack, although the implementation allows multiple players  to use the same strategy. 
+
+
+REQUIREMENTS COVERED:
+
+-Single Deck shuffled every 6 rounds. Presently runs 13 rounds.
+-No splits
+-Dealer hits on soft 17
+-Winning Percentage is tracked.
+
+
+TO RUN THE GAME:
+Download the code and on command line:
+>make
+>./black
+
+
+

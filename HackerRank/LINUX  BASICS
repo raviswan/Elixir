@@ -1,0 +1,77 @@
+LINUX  BASICS
+Each process: data,text,stack,heap (DTSH)
+fork(): creates new process that inherits DTSH of its parent to modify. calls execve() call to load and execute new program
+execve():destroys DTSH,creates new DTSH
+init:
+	-/sbin/init
+	- pid=1. 
+	- mother of all processes.
+	- every other process created from it via fork() directly or indirectly. Look at ppid
+	- Can never be killed unless shut down. 
+daemon:
+	- typcailly started at boot,killed at shutdown, runs in background
+	-no access to stdin or stdout
+each process gets its own env variables.
+IPC mechanism:
+	- signals aka software interrupts:sent by kernel,another process,itself etc.SIGINT,SIGKILL etc.
+	-pipes
+	-sockets
+	-shared memory
+	-message queue
+	-semaphore:for synchronization
+
+Threads: 
+	- each proces has multiple threads
+	- They share DTH. Each its own stack space.
+	- Shares same virtual memory
+	-communicate with each other via global variables, 
+	- synchronize using mutexes.
+	- easy to share data bet. threads via global variables.
+
+SystemCall:
+	-eg.open(),read(),write(),close(),ioctl(fd,request),fcntl(fd,)
+	- entry point into linux kernel. e.g.printf gets turned into write() system call.
+	- to run system call, printf assigns sytem call number, writes to specif memory location. The processor switches from user mode to kernel mode and executes the trap handler, and calls system call service routine.
+	- the routine performs required task (i/o, transferring date bet kernel and user memory) and sends the status back to user space function in form of errno. And the returns the result as well.
+
+Virtual Memory:
+Every process has virtual memory map as follows:
+
+0xFF0 - - - - - - - - - - - - 
+	 | Kernel code (RO)		 |	
+	 |mapped into process  	 |
+	 |- - - - - - - - - - - - 
+	 |  Stack 				 |	
+	 |	|                    |
+	 |	|Growing downward    |
+	 |	v                    |
+	 |- - - - - - - - - - - -| Top of Stack
+	 |
+	  - - - - - - - - - - - - Program Break
+	 |  ^                    |
+	 |	|                    |
+	 |	|Growing upward      |
+	 |	                     |
+	 |                       |
+	 |                       |
+	 |     Heap              |
+	 |
+	 |- - - - - - - - - - - -| 
+	 |	Global/Static Data   |
+	 |                       |
+	 |- - - - - - - - - - - -| 
+	 |	text(program code)   |
+	 |                       |
+0x00  - - - - - - - - - - - - 
+
+	- Each process  virtual memory split into pages.
+	 - RAM mapped into page frames.
+	- Kernel maintins 1 page table/process.
+	- Page table maps the pages into RAM page frames , or swap area
+	- Swap area is where the pages of process not in RAM are stored , typically on disks
+	- Only certain pages of process are in RAM at any given point.
+	- Page fault when a page not in RAM is accessed by the process. Kernel suspends execution until page is loaded
+	- This way, different processs are isolated. can't access another process' page frames.
+	- Virtual memory Implementation required PMMU(Paged Memory Management Unit) H/W.
+	- Memory sharing occurs in case of shared library/ or IPC using shared memory.
+
