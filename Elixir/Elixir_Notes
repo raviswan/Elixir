@@ -1,0 +1,221 @@
+ELIXIR NOTES
+=====================
+- Elixir code is transpiled into Erlang before executing on BEAM
+
+- No capitalized variables for anything except module name. You can reassign  a variable to anything
+- elixirc is used to compile .ex and produce beam .Whereas "elixir .exs"  won't produce beam as it
+ is meant for scripting
+
+- String is UTF-8 encoded binary : “this one”
+- keywords : nil, true, false
+ Remember, 
+- Fixing a variable is done as: n =1
+ 								 ^n
+ - iex: shell for elixir
+  	Inside shellm, to get info on any variable 	> i n 
+
+- Char lists are given by  single quotes. ‘thisone’ They are like strings of erlang. Each points to the next element of the list
+
+- Tuples are together in memory, so anything with predetermined size uses size(), e.g. tuple_size()
+
+- IO.puts "the value is #{name}" would print value of name as part of string
+- IO.inspect(): to print the nested values on the console
+
+
+- Linearly increasing structures use length(). E.g. String.length(“hello”), byte_size(“hello”)
+
+- Atoms are called this way: :ok, :ignore
+- Fun is defined is :
+ 		a = fn p -> 2*p end
+		a.(2) returns 4
+- Modules are defined as : 
+	defmodule Name do
+		…
+	end
+- Functions are defined as: 
+	def func do
+		…
+	end
+- Remember functions are called are as ModuleName.FuncName(args)
+
+
+- String concatenation is binary concatenation: <<1,2>> <> <<3,4>>  results in <<1,2,3,4?>>
+	So does: "hello" <> "world" results in "helloworld"
+	- To see a binary representation of a string, do this: "hello" <> <<0>>
+	- <<256::size(16)>> will result in <<1,0>>
+	- <<256>> will result in <<0>>
+	- <<256::utf-8>> will print the character
+	- is_binary(<<1::size(1)>>) returns  false
+	- <<4::size(3)>> returns 4, 
+
+- Binaries: 
+	<<256 :: size(16)>> returns <<1,0>>>
+	<<255>> returns <<0>>
+	<<0, 1, x :: binary>> = <<0, 1, 2, 3>> returns x <<2, 3>>
+
+-KeyLists: when keys are atoms and key can be given more than once
+	[a: 1, b: 2] ++ [c: 3] is same as [{:a,1}, {:b, 2}, {:c,3}]
+
+	In general, when the keyword list is the last argument of a function, the square brackets are optional.
+	Therefore,
+	if(false, [do: :this, else: :that]) is same as 
+	if false, do: :this, else: :that
+
+Maps:
+-----------
+@@@Important:
+One key assosciates with only one value.
+
+- m = %{:a => 1, 3 => "abc"}
+ 	m[:a] returns 1
+ 	m[3] returns "abc"
+
+- updating a map : m = %{m | 3 => :3}
+- When all keys are atoms:
+	map1 = %{a: 1, b: 2}
+	map1.a returns 1
+
+Adding another value to existing map :
+ - Map.Put(m, :c,4)
+
+
+Function Capturing:
+---------------------
+Using '&'' operator. Can be used with named functionns to convert them to anonymous func
+
+	fun = &Module.func/2 to convert a module func into anonymous function.
+	fun.(1,2) 
+
+Alternately,
+	fun = &Module.func(&1,&2) where &1, and &2 stand for first two parameters
+	fun.(1,2)
+
+default value is specified by '\\` operator . 
+	fun(a, b \\ 0) where b has default value of zero
+	
+
+
+Library Functions:
+-----------
+	- Enum.shuffle(deck)
+	- Enum.member?(deck, card) :  usually questions in the member function implies return value is boolean
+	- Enum.split(deck, 2) :  returns a {[first 2 cards], [Rest of deck]}
+	- to call erlang ->   :erlang.binary_to_term(value)
+
+
+Creating a Elixir project (MIX TOOL)
+-----------
+	- mix new cards     -> create a new project called cards
+	- iex -S mix  (start elixir shell for mix)
+	- mix deps.get  -> Run this when you want to add dependency to the project,but after updating mix.exs deps[]section
+	- mix docs    -> to generate documentation.  (remember: @moduledoc, @doc)
+	- mix test
+
+- Pipe operator : |> 
+	It passes output of one function call into the second function as the latter's first argument.	
+
+
+Keyword Lists:
+-----------------
+- list made of tuples with first element of every tuple is an atom
+
+Eg: l = [{:a, 1}, {:b, 2}, {:a, 3}] can also be written as :
+l = [a:1, b:2, a:3]
+
+
+Structs:
+-----------------
+Just like maps but you can assign default values.
+Think of struct as Erlang record #{}
+Initialization is in separate module that only holds definition of struct starting with keyword "defstruct"
+This typically holds all of data inside an application.
+Syntax for a "sample" struct  with multiple fields
+	defmodule StructExample do
+		defstruct 	 grid: nil, pixel_map: nil, color: nil
+	end
+
+to access it:
+s  = %StructExample{}
+To update the above with color blue, do the following
+%StructExample{s | color: "blue"}
+
+See Identicon example for further syntax
+
+import , alias, use
+-----------------
+You import a module "OldModule" into another module "NewModule". That way all the functions from the imported modules become part of this module
+and be called as NewModule.foo() although foo is defined in OldModule
+
+alias would mean if the function being called is not defined in the current module , look in the other module.
+But it cannnot be called as NewModule.foo(). foo() can only be called inside other functions of the current module.
+
+use: is for deriving functions already defined. A bit like import, but it inherits a varied set of functions
+from various modules and libraries. E.g. use Web.Model, use Web.Controller etc.
+
+PHOENIX
+-----------
+
+- mix phx.new <projname>
+- cd <projname>
+- mix ecto.create (postgres username and password are changed here. This step is for setting up db for the app)
+- mix phx.server
+- iex -S mix phx.server
+- mix ecto.gen.migration add_topics (once you do this, you;ll have  afile under priv/repo/migrations/ which defines the table)
+- mix ecto.migrate (this will create the table inside the db. Every time you create a table in db, you gotta let Phoenix know of that table by creating a Model file under webs/models/). Inside Model file, you gotta define schema to match the
+table you created. And then you gotta define changeset as well. changeset is what turns record or struct into something
+inserte into db		
+- mix phx.routes  : to list all routes available to the app
+
+
+
+
+- Remember, server side rendering vs client side rendering
+	- Server side rendering means every request is sent to the server and the server renders it. Even a page update would require a call to the server.
+	In client side rendering, initial rendering is done by server and after that, any update is done by JS on the client side
+
+- MVC: Model View Controller : where model represents the data 
+	View represents the UI part and Controller represents the part that works with Model and View
+	Remember the binary_to_term (model), muffin pan(view) and cook (controller)
+
+- Difference between Views and Templates:
+Whenever a Controller like TopicController calls render() to render, Phoenix assumes we have a view with same name (TopicView) and we need to have a form called new.html because that matches up with function name under the TopicController
+	Remember Phoenix when it starts up, it first looks at the "views" folder , looks at name of the module , grab the name 
+and looks for the same name under templates/ . It then takes every file inside that templates subfolder (e.g page/ for PageController) and add it as fucntion to the View . e.g index.html under page/ will be called as render("index.html") of page_view.
+
+
+- Migration : purpose is tell db that this is a structure the db should have.
+- Pay particular attn to Plug.Conn struct. This is the incoming http request
+
+- Phoenix Model file under model/ (e.g. topic.ex) is used for the Phoenix to be able to communicate with the database. 
+	- It will, for instance tell Phoenix to look inside of psql to find a table called "topics" with column "title" of type string. That's the purpose of  "schema" call
+	- Remember, when we  do "use Discuss.Web, :model" under this module Discuss.Topic, it will create  an empty struct %Discuss.Topic{}
+	- Next step is to validate the data that will be going into the db. Remember changeset() call. It returns changeset as well. The first argument to changeset() is a struct that represents the record in the database. The second argument, param is the value that will get stored in the database. the changeset() will generate a changeset datatype by Ecto, to be written to the db. When you first insert data into the database, the first argument will be empty struct %Discuss.Topic{}. The second argument is the one that we wanna insert into the database
+- changeset gets passed to Repo. Repo module is the handle on the database. It is the one that inserts the data into db.
+ - Remember:
+
+ 	Phoenix     | Ecto
+ 	------------------------	
+ 	Controller	| changeset
+ 	Model 		| repo
+ 			    |
+ 	------------------------
+- <%= elixir code inside html %>
+
+ E.g. <%= form_for @changeset, topic_path(@conn, :create), fn f-> %>
+
+ 	<% end %>
+
+The above snippet would execute an elixir function form_for() with 3 params. It says:
+Create a form using this changeset. When someone submits the form, send the form to 'create` route related to topic_path.
+Inside the fun f,  we'd place submit buttons etc.	f represents the form object
+'topic_path' is what you see when you run `mix phx.routes`
+@ means that variable is passed in to the template. i..e. To pass custom variables to template
+
+- TO redirect to a new page, you'd do: redirect(to: topic_path(conn, :index))
+
+- When you do OAuth, you first send a request to the OAuth provider, like Github. Github recognizes the request is coming from your app. Once it's verified your app is legitimate (this is done by pre-registering with Github, which  would then provide your app withclient key and client secret. These two are stored as config parameters in your app, and used to identify the app when you redirect a user to Github)
+Once Github verifies the app is legal, it redirects back to your app with a user code, which the client aka the app (spefifically UeberAuth) then uses to communicate with Github to get more info on the user. Refer to the Lecture 93 of Udemy Oauth.
+- When you inspect the conn that returns from redirect of GitHub, you'd see that it has a field call "token". That field is needed to do any action on behalf of the user on Github
+
+- Cookies for a given website are automatically sent along with every single request user makes to that domain/web server.  If you visit Google.com, google cookies are received. They are not shared across websites. For eg. yahoo cookies are not sent to google webserver. All cookies are encrypted in Pheonix.
+- In phoenix, cookie is referred to as "session" 
