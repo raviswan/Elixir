@@ -5,6 +5,8 @@ defmodule Discuss.AuthController do
 
 	def callback(%{assigns: %{ueberauth_auth: auth}} = conn, params) do
 		IO.inspect(conn.assigns)
+		IO.inspect("++++++++++++++++")
+		IO.inspect(params.provider)
 		user_params = %{token: auth.credentials.token, email: auth.info.email, provider: "github"}
 		#the call below goes to the model
 		changeset = Discuss.User.changeset(%Discuss.User{}, user_params)

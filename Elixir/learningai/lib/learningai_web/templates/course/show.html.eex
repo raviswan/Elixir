@@ -1,0 +1,15 @@
+<div>
+    <h2> <%= @course.name %></h2>
+</div>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @course.name %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: course_path(@conn, :edit, @course) %> </span>
+ <span><%= link "Back", to: course_path(@conn, :index) %> </span>

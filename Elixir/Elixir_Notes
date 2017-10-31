@@ -105,7 +105,7 @@ Library Functions:
 
 Creating a Elixir project (MIX TOOL)
 -----------
-	- mix new cards     -> create a new project called cards
+	- mix new cards     -> create a new project called cards 
 	- iex -S mix  (start elixir shell for mix)
 	- mix deps.get  -> Run this when you want to add dependency to the project,but after updating mix.exs deps[]section
 	- mix docs    -> to generate documentation.  (remember: @moduledoc, @doc)
@@ -152,45 +152,85 @@ But it cannnot be called as NewModule.foo(). foo() can only be called inside oth
 use: is for deriving functions already defined. A bit like import, but it inherits a varied set of functions
 from various modules and libraries. E.g. use Web.Model, use Web.Controller etc.
 
-PHOENIX
------------
+---------------------------------------------------------
+--------------------------------------------------------
+					PHOENIX
+--------------------------------------------------------
+--------------------------------------------------------
 
 - mix phx.new <projname>
 - cd <projname>
-- mix ecto.create (postgres username and password are changed here. This step is for setting up db for the app)
-- mix phx.server
-- iex -S mix phx.server
-- mix ecto.gen.migration add_topics (once you do this, you;ll have  afile under priv/repo/migrations/ which defines the table)
-- mix ecto.migrate (this will create the table inside the db. Every time you create a table in db, you gotta let Phoenix know of that table by creating a Model file under webs/models/). Inside Model file, you gotta define schema to match the
-table you created. And then you gotta define changeset as well. changeset is what turns record or struct into something
-inserte into db		
+- mix ecto.create 
+	(change postgres username and password before running this step. This step is for setting up db for the app.
+	After this you'll find a file under priv/migrations for the db operations)
+- mix phx.server 
+	(the page that gets displayed for localhost:4000 is under web/templates/page/index.html)
+   or iex -S mix phx.server
+- mix phx.gen.html Instructors Course courses name:string  
+	(The above step will generate Instructors context with course model that has a field of type string called "name" )
+   (OLD WAY : - mix ecto.gen.migration add_topics (once you do this, you;ll have  a file under priv/repo/migrations/. define the table here)
+
+- mix ecto.migrate (this will create the table inside the db).
+
+  (OLD WAY: Every time you create a table in db, you gotta let Phoenix know of that table by creating a Model file under webs/models/). Inside Model file, you gotta define schema to match the
+   table you created. And then you gotta define changeset as well. changeset is what turns record or struct into something inserted into db	
+
 - mix phx.routes  : to list all routes available to the app
 
 
 
 
-- Remember, server side rendering vs client side rendering
+- Server side rendering vs Client side rendering
+-------------------------------
 	- Server side rendering means every request is sent to the server and the server renders it. Even a page update would require a call to the server.
 	In client side rendering, initial rendering is done by server and after that, any update is done by JS on the client side
 
 - MVC: Model View Controller : where model represents the data 
+-------------------------------
 	View represents the UI part and Controller represents the part that works with Model and View
 	Remember the binary_to_term (model), muffin pan(view) and cook (controller)
+	Refer to lecture 078 of Udemy
+    
+    Purpose of Controller is that it takes model (aka data), a view (aka html), mash them 
+   together and send it back to the user
 
 - Difference between Views and Templates:
-Whenever a Controller like TopicController calls render() to render, Phoenix assumes we have a view with same name (TopicView) and we need to have a form called new.html because that matches up with function name under the TopicController
-	Remember Phoenix when it starts up, it first looks at the "views" folder , looks at name of the module , grab the name 
-and looks for the same name under templates/ . It then takes every file inside that templates subfolder (e.g page/ for PageController) and add it as fucntion to the View . e.g index.html under page/ will be called as render("index.html") of page_view.
+----------------------------------------------
+Whenever a Controller like TopicController calls render() to render, Phoenix assumes we have a view with same name (TopicView) and we need to have a form called new.html because that matches up with function name under the TopicController (udemy-093.mov)
 
+-Remember Phoenix when it starts up, it first looks at the "views" folder , looks at name of the module , grab the name  and looks for the same name folder under templates/ . 
+Therefore,
+-----------------------------------------------------------
+ Name of a view module under views/ ===> similar named folder inside template/
+------------------------------------------------------------
+- It then takes every file inside that templates subfolder (e.g template/page/ for PageController) and add it as function parameter to the PageView render function . e.g index.html under page/ will be called as render("index.html") of PageView module.
 
+In other words, render("index.html") in PageController would mean look for index.html under page/ of template/
+This happens when the phoenix server starts up. render() is not present in PageView
+but if you start phoenix server and goto elixir shell and type
+ > Discuss.PageView.render("index.html"), it will display html contents on the screen
+
+=====================
+DB SETUP
+=====================
 - Migration : purpose is tell db that this is a structure the db should have.
 - Pay particular attn to Plug.Conn struct. This is the incoming http request
 
 - Phoenix Model file under model/ (e.g. topic.ex) is used for the Phoenix to be able to communicate with the database. 
 	- It will, for instance tell Phoenix to look inside of psql to find a table called "topics" with column "title" of type string. That's the purpose of  "schema" call
-	- Remember, when we  do "use Discuss.Web, :model" under this module Discuss.Topic, it will create  an empty struct %Discuss.Topic{}
-	- Next step is to validate the data that will be going into the db. Remember changeset() call. It returns changeset as well. The first argument to changeset() is a struct that represents the record in the database. The second argument, param is the value that will get stored in the database. the changeset() will generate a changeset datatype by Ecto, to be written to the db. When you first insert data into the database, the first argument will be empty struct %Discuss.Topic{}. The second argument is the one that we wanna insert into the database
+
+	- Remember, when we  do "use Discuss.Web, :model" under this module Discuss.Topic, it will create  an empty struct %Discuss.Topic{} . 
+	-------------
+	changeset
+	-------------
+	- Next step is to validate the data that will be going into the db. Remember changeset() call. It returns changeset as well. The first argument to changeset() is a struct that represents the record in the database as created by default in the previous step. 
+
+	The second argument, param is the value that will get stored in the database.  This value is validated in validate_required() based on the field specified. This means that the changeset cannot be valid if that particular field of the structure is empty or nil. If the field is valid, then the changeset() function will generate a changeset datatype by Ecto, to be written to the db. Observe the output changeset datatype in shell.It has a valid field, and afew others.
+
+	When you first insert data into the database, the first argument will be empty struct %Discuss.Topic{}. The second argument is the one that we wanna insert into the database
+
 - changeset gets passed to Repo. Repo module is the handle on the database. It is the one that inserts the data into db.
+
  - Remember:
 
  	Phoenix     | Ecto
@@ -199,23 +239,82 @@ and looks for the same name under templates/ . It then takes every file inside t
  	Model 		| repo
  			    |
  	------------------------
-- <%= elixir code inside html %>
+  Repo.get! or Repo.delete! same as one without ! except it returns changeset
 
- E.g. <%= form_for @changeset, topic_path(@conn, :create), fn f-> %>
+=====================
+FORM HELPERS and HTML
+======================
 
- 	<% end %>
+Form helpers like below  expect changeset to work with
+  <%= elixir code inside html %>
 
-The above snippet would execute an elixir function form_for() with 3 params. It says:
-Create a form using this changeset. When someone submits the form, send the form to 'create` route related to topic_path.
-Inside the fun f,  we'd place submit buttons etc.	f represents the form object
-'topic_path' is what you see when you run `mix phx.routes`
-@ means that variable is passed in to the template. i..e. To pass custom variables to template
+  <%= form_for @changeset, topic_path(@conn, :create), fn f-> %>
+ 
+  <% end %>
+
+	-The above snippet would execute an elixir function form_for() with 3 params. It says:
+		- Create a form using this changeset. When someone submits the form, send the form to 'create` route related to topic_path.
+
+		 - Inside the fun f,  we'd place submit buttons etc.	f represents the form object
+		'topic_path' is what you see when you run `mix phx.routes`
+
+		- @ before a variable means that Elixir variable is passed in to the template. i.e. To pass custom variables to templates
+
+		- E.g. render(conn, "index.html", courses: courses) 
+		  Here "courses" variable will be passed  from controller into template's "index.html" like below:
+		  <%= for course <- @courses do %>
+
+        - And   when topic_path(@conn, :create) call is made from template, it comes back to the
+          "create" function in the TopicController with "params" argument holding the data entered into the form, which is extracted using pattern matching
+
+	href
+	------
+  - <%= link "Edit", to: topic_path(@conn, :new) %> 
+  	This is to html equivalent of  <a href= equivalent>, where you say go to topic/new controller path when this link "Edit" is clicked on. So, link is replacement for anchor tag <a> and topic_path tells you where to go to
+
+  - <%= link "Delete", to: topic_path(@conn, :delete, topic), method: :delete %>
+  	Similar to above href  <a href= equivalent>, except that link by default is for GET request. But for Delete,
+  	we have to send a "DELETE" message according to REST conventions. Hence, the method: argument at the end.
+
+	edit
+	----
+  - When you need to edit a specific item , we feed in the "id" of the item to be edited.
+  Then what we do is fetch the record from the db using Repo.get(). And  because form helpers work only with
+  changeset, we create a changeset	using the obtained record. This changeset is then passed to the 
+  edit.html. We also pass the original record we fetched because we need the "id" for submitting the form.
+
+	<%= text_input f, :title, placeholder: "Title", class: "form-control" %>
+  In the above,     "text_input f, :title  " informs us to get the :title property of form object f
+  and populate that in the html input form. Refer to 107_udemy for this and REST convention
 
 - TO redirect to a new page, you'd do: redirect(to: topic_path(conn, :index))
 
-- When you do OAuth, you first send a request to the OAuth provider, like Github. Github recognizes the request is coming from your app. Once it's verified your app is legitimate (this is done by pre-registering with Github, which  would then provide your app withclient key and client secret. These two are stored as config parameters in your app, and used to identify the app when you redirect a user to Github)
-Once Github verifies the app is legal, it redirects back to your app with a user code, which the client aka the app (spefifically UeberAuth) then uses to communicate with Github to get more info on the user. Refer to the Lecture 93 of Udemy Oauth.
-- When you inspect the conn that returns from redirect of GitHub, you'd see that it has a field call "token". That field is needed to do any action on behalf of the user on Github
+
+CONN object
+---------------
+- conn object coming into the controller is the incoming http request. We inspect the conn object, we do some processing on it, add some response field etc. and pass it on to the next step. `conn` object is passed from one to other unti we are ready to return the response.
+- `params` object is used to parse the url. 
+
+OAUTH
+------------
+- When you do OAuth, you first send a request to the OAuth provider, like Github. Github recognizes the request is coming from your app based on your url. Once it's verified your app is legitimate (this is done by pre-registering with Github, which  would then provide your app withclient key and client secret. These two are stored as config parameters in your app, and used to identify the app when you redirect a user to Github)
+Once Github verifies the app is legal, it redirects the user back to your app with a user code. This user ode is used what the client aka the Elixir app (spefifically UeberAuth) then uses to communicate with Github to get more info on the user. Refer to the Lecture 93 of Udemy Oauth.
+
+- After you oauth with Github one time, every other request from the same user to Github will be instantly approved.
+- "conn.assigns" is importatnt. When you inspect the conn that returns from redirect of GitHub, you'd see that it has a field call "token". That field is needed to do any action on behalf of the user on Github
 
 - Cookies for a given website are automatically sent along with every single request user makes to that domain/web server.  If you visit Google.com, google cookies are received. They are not shared across websites. For eg. yahoo cookies are not sent to google webserver. All cookies are encrypted in Pheonix.
-- In phoenix, cookie is referred to as "session" 
+- In our case , after user authenticates using Oauth, we take the token and insert the user info into
+db. The generated "user.id" for the db record is then going to be sent back to the user browser as encrypted cookie. In phoenix, cookie is referred to as "session" . It is eseentially something that identifies the user across multiple requests. Every time user sends subsequent request to our domain  , the cookie is sent along with the requestto identify the user logging in to our website. Refer to 122_Udemy flowchart at 02.45 mark.
+
+===============
+PLUGS
+===============
+
+It is a function that does tiny transformation on connection object, "conn". Phoenix is based totally on plugs.
+All controllers are technically plugs. For e.g. render() returns conn object, not html.
+
+Two types of plugs: Function plug vs Module Plug
+
+Example of function plug is the controller example above. Both can be used for any given scenario. If you
+wanna use it many locations, you make Module plug. Else you go with function plug
