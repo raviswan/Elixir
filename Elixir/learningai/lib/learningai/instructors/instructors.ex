@@ -4,6 +4,7 @@ defmodule Learningai.Instructors do
   """
 
   import Ecto.Query, warn: false
+  import Ecto
   alias Learningai.Repo
 
   alias Learningai.Instructors.Course
@@ -54,6 +55,8 @@ defmodule Learningai.Instructors do
     |> Course.changeset(attrs)
     |> Repo.insert()
   end
+  
+
 
   @doc """
   Updates a course.
@@ -100,5 +103,12 @@ defmodule Learningai.Instructors do
   """
   def change_course(%Course{} = course) do
     Course.changeset(course, %{})
+  end
+
+  def create_course_with_user(course_w_user, attrs \\ %{}) do
+    course_w_user
+    |> build_assoc(:courses)
+    |> Course.changeset(attrs)
+    |> Repo.insert()
   end
 end

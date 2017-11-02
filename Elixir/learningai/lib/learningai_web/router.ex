@@ -1,14 +1,13 @@
 defmodule LearningaiWeb.Router do
   use LearningaiWeb, :router
 
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    #plug LearningaiWeb.Plugs.SetUser
+    plug LearningaiWeb.Plugs.SetUser
 
   end
 
@@ -25,6 +24,7 @@ defmodule LearningaiWeb.Router do
 
   scope "/auth", LearningaiWeb do
     pipe_through :browser
+    get "/signout", AuthController, :signout
     # for path /auth/github. the "request" function is defined automatically
      get "/:provider", AuthController, :request
      # for return back from github

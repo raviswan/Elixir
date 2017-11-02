@@ -177,6 +177,18 @@ from various modules and libraries. E.g. use Web.Model, use Web.Controller etc.
 
 - mix phx.routes  : to list all routes available to the app
 
+- To add a new database called users:
+	mix phx.gen.schema User users first_name:string last_name:string email:string provider:string token:string
+	mix ecto.migrate
+
+ - Modify existing database by adding another field to it: 
+	> mix ecto.gen.migration add_user_id_to_courses  (eseentually, we are assosciating many courses to one user.User will have many topics assosciated with it, while a topic will have only one user assosciated with it.
+	)
+	  Now add a field in the newly generated priv/.exs file under change() to "alter table". 
+	- Then, on the model side of things, add "has_many" field to User schema and "belongs_to" field in Course schema
+	> mix ecto.migrate
+		
+
 
 
 
@@ -241,6 +253,9 @@ DB SETUP
  	------------------------
   Repo.get! or Repo.delete! same as one without ! except it returns changeset
 
+ - Any time we change the PSQL database, we got to create a migration file, and run that migration.
+
+
 =====================
 FORM HELPERS and HTML
 ======================
@@ -289,23 +304,35 @@ Form helpers like below  expect changeset to work with
 
 - TO redirect to a new page, you'd do: redirect(to: topic_path(conn, :index))
 
-
+===========
 CONN object
----------------
+===========
 - conn object coming into the controller is the incoming http request. We inspect the conn object, we do some processing on it, add some response field etc. and pass it on to the next step. `conn` object is passed from one to other unti we are ready to return the response.
 - `params` object is used to parse the url. 
 
+===========
 OAUTH
-------------
+===========
 - When you do OAuth, you first send a request to the OAuth provider, like Github. Github recognizes the request is coming from your app based on your url. Once it's verified your app is legitimate (this is done by pre-registering with Github, which  would then provide your app withclient key and client secret. These two are stored as config parameters in your app, and used to identify the app when you redirect a user to Github)
 Once Github verifies the app is legal, it redirects the user back to your app with a user code. This user ode is used what the client aka the Elixir app (spefifically UeberAuth) then uses to communicate with Github to get more info on the user. Refer to the Lecture 93 of Udemy Oauth.
 
+- We use UeberAuth library to do OAuth. 
+- As part of initial settings, you have to store the client key and secret in our elixir project config/config.exs
+- Remember, there's separate route for auth, indicated by scope("/auth"). All the routes under that will be 
+prefixed by /auth. Therefore, to kick off OAuth, you have to set the route as www.mysite.com/auth/github
+
+- And once the user authorizes your app with Github, Github knows what route to generate, which would be
+/auth/github/callback. Goto GitHub -> Developer Settings to look at that.
+
+
 - After you oauth with Github one time, every other request from the same user to Github will be instantly approved.
-- "conn.assigns" is importatnt. When you inspect the conn that returns from redirect of GitHub, you'd see that it has a field call "token". That field is needed to do any action on behalf of the user on Github
+
+- "conn.assigns" is importatnt. When you inspect the conn that returns from redirect of GitHub, you'd see that it has a field call "token". That field is needed to do any action on behalf of that user on Github
 
 - Cookies for a given website are automatically sent along with every single request user makes to that domain/web server.  If you visit Google.com, google cookies are received. They are not shared across websites. For eg. yahoo cookies are not sent to google webserver. All cookies are encrypted in Pheonix.
+
 - In our case , after user authenticates using Oauth, we take the token and insert the user info into
-db. The generated "user.id" for the db record is then going to be sent back to the user browser as encrypted cookie. In phoenix, cookie is referred to as "session" . It is eseentially something that identifies the user across multiple requests. Every time user sends subsequent request to our domain  , the cookie is sent along with the requestto identify the user logging in to our website. Refer to 122_Udemy flowchart at 02.45 mark.
+db. The generated "user.id" for the db record is then going to be sent back to the user browser as encrypted cookie. In phoenix, cookie is referred to as "session" . It is eseentially something that identifies the user across multiple requests. Every time user sends subsequent request to our domain  , the cookie is sent along with the request to identify the user logging in to our website. Refer to 122_Udemy flowchart at 02.45 mark.
 
 ===============
 PLUGS
@@ -318,3 +345,44 @@ Two types of plugs: Function plug vs Module Plug
 
 Example of function plug is the controller example above. Both can be used for any given scenario. If you
 wanna use it many locations, you make Module plug. Else you go with function plug
+
+Module plug must always use 2 function calls: init() and call()	
+
+Check 129_Udemy for how auth plugs are used for restricting access to pages.
+Check 136_Udemy (08:27) for how restful convention restrictions
+
+We have created 3 plugs so far.
+ 1. SetUser Plug: This Module plug is set in :browser pipeline for every request. This ensures current user is    
+    assigned to the conn object as it traverses through.
+
+ 2. RequireAuth Plug: This Module plug is used to ensure only logged in users can create/delete/edit post ,not 
+   some random guest.
+
+ 3. Check course owner plug: This function plug will serve as additional check so that only the owner who created 
+    the course can edit/delete it.
+
+halt() tells Plug that the connection need not be passed further. So we use that
+
+To use a plug to , put it inside a controller, above all functions like this:
+
+plug LearningaiWeb.Plugs.RequireAuth when action in [:new, :create, :edit, :update, :delete ]
+
+This informs us that the require_auth plug will run only for the "actions" defined in the list
+
+
+==============
+PSQL COMMANDS
+==============
+
+> psql -U Ram     (to log in)
+> \connect learningai_dev     (to connect to database)
+> \d 						(list all tables)
+> \d courses 				(list schema of a specific table)
+
+
+
+=================
+USEFUL DEBUG COMMANDS
+==================
+- mix help
+- rm -rf _build (from project home dir)

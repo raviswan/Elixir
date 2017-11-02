@@ -3,11 +3,13 @@
 
   alias Learningai.Instructors
   alias Learningai.Instructors.Course
+  alias Learningai.Repo
+
+  plug LearningaiWeb.Plugs.RequireAuth when action in [:new, :create, :edit, :update, :delete ]
+  plug :check_course_owner when action in [:update, :edit, :delete]
 
   def index(conn, _params) do
-    IO.puts("+++++++++++++")
     IO.inspect(conn.assigns)
-    IO.puts("+++++++++++++")
     courses = Instructors.list_courses()
     render(conn, "index.html", courses: courses)
   end
@@ -18,7 +20,8 @@
   end
 
   def create(conn, %{"course" => course_params}) do
-    case Instructors.create_course(course_params) do
+    #case Instructors.create_course(course_params) do
+    case Instructors.create_course_with_user(conn.assigns.user, course_params) do
       {:ok, course} ->
         conn
         |> put_flash(:info, "Course created successfully.")
@@ -36,8 +39,8 @@
   def edit(conn, %{"id" => id}) do
     course = Instructors.get_course!(id)
     changeset = Instructors.change_course(course)
-    # render(conn, "edit.html", course: course, changeset: changeset)
-    render(conn, "edit_content.html", course: course, changeset: changeset)
+    render(conn, "edit.html", course: course, changeset: changeset)
+    #render(conn, "edit_content.html", course: course, changeset: changeset)
 
   end
 
@@ -62,4 +65,23 @@
     |> put_flash(:info, "Course deleted successfully.")
     |> redirect(to: course_path(conn, :index))
   end
+
+  def check_course_owner(conn, _plugparams) do
+    #This :params is courtesy "resource" controller helper. It pulls "id" out of the url and attach it to connect   
+    # object under params.id property
+    %{params: %{"id" => course_id}} = conn
+
+    #Fetch the user id for the course id specified in the url and see if it equals the current user id,
+    #let connection through, else reject
+    if Repo.get(Course, course_id).user_id == conn.assigns.user.id do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You cannot modify  that")
+      |> redirect(to: course_path(conn, :index))
+      |> halt()
+
+    end
+  end
+
 end

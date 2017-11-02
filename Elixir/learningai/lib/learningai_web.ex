@@ -21,7 +21,10 @@ defmodule LearningaiWeb do
     quote do
       use Phoenix.Controller, namespace: LearningaiWeb
       import Plug.Conn
+
       import LearningaiWeb.Router.Helpers
+      ## The above line commented out to resolve a bug thata was causing kernel deadlock
+      #alias LearningaiWeb.Router.Helpers, as: Routes
       import LearningaiWeb.Gettext
     end
   end
@@ -38,6 +41,7 @@ defmodule LearningaiWeb do
       use Phoenix.HTML
 
       import LearningaiWeb.Router.Helpers
+      #alias LearningaiWeb.Router.Helpers, as: Routes
       import LearningaiWeb.ErrorHelpers
       import LearningaiWeb.Gettext
     end

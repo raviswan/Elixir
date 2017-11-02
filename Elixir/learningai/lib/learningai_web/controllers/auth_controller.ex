@@ -4,7 +4,6 @@ defmodule LearningaiWeb.AuthController do
 
   alias Learningai.User
   alias Learningai.Repo
-  
 
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"provider" => provider} = _params) do
@@ -19,7 +18,7 @@ defmodule LearningaiWeb.AuthController do
                 conn
                 |> put_flash(:info, "Welcome back")
                 # The cookie  stored below as K-V pair is handled by phoneix. The value is encrypted
-                |> put_session(:user_id, user.id)
+                |> Plug.Conn.put_session(:user_id, user.id)
                 |> redirect(to: course_path(conn, :index))
             {:error, _reason} ->
                 conn
@@ -27,19 +26,24 @@ defmodule LearningaiWeb.AuthController do
                 |> redirect(to: course_path(conn, :index))
 
         end
-    end
+  end
 
 
-    defp insert_or_update_user(changeset) do
-        case Repo.get_by(User, email: changeset.changes.email) do
+  defp insert_or_update_user(changeset) do
+    case Repo.get_by(User, email: changeset.changes.email) do
             nil ->
-                IO.puts("+++++++++++++")
-                IO.inspect(changeset)
                 Repo.insert(changeset)
             user -> 
                 {:ok, user}
 
-        end
     end
+  end
+
+  #This essentially sets the user_id to nil. We could have done put_session(:user_id, nil)
+  def signout(conn, _params) do
+    conn 
+    |> Plug.Conn.configure_session(drop: true)
+    |> redirect(to: course_path(conn, :index))
+  end
 
 end

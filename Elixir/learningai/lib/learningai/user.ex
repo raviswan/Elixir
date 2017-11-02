@@ -6,10 +6,12 @@ defmodule Learningai.User do
 
   schema "users" do
     field :email, :string
-    field :first_name, :string
+    field :first_name, :string  
     field :last_name, :string
     field :provider, :string
     field :token, :string
+
+    has_many :courses, Learningai.Instructors.Course
 
     timestamps()
   end

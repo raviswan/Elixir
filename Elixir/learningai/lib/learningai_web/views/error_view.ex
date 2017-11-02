@@ -1,5 +1,6 @@
 defmodule LearningaiWeb.ErrorView do
   use LearningaiWeb, :view
+  
 
   def render("404.html", _assigns) do
     "Page not found"

@@ -14,11 +14,30 @@
   <body>
     <div class="container">
       <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
+        <%# <nav role="navigation"> %>
+          <%# <ul class="nav nav-pills pull-right">
             <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
+          </ul> %>
+       <%#  </nav> %>
+        <nav class="green">
+          <div class="nav-wrapper container">
+          <a href="/" class="brand-logo">Courses</a>
+          </div>
+          <ul class="nav nav-pills pull-right">
+            <%= if @conn.assigns[:user] do %>
+              <li>
+                <%= link "Sign Out", to: auth_path(@conn, :signout) %>
+              </li>
+            <%= else %>
+              <li>
+               <%= link "Github Sign-in", to: auth_path(@conn, :request, "github") %>
+               </li>
+
+            <%= end %>
+   
           </ul>
         </nav>
+
         <!-- <span class="logo"></span> -->
       </header>
 

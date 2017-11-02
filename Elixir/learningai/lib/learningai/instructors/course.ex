@@ -6,7 +6,7 @@ defmodule Learningai.Instructors.Course do
 
   schema "courses" do
     field :name, :string
-
+    belongs_to :user, Learningai.User
     timestamps()
   end
 
